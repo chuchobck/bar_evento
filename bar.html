@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bar — POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C0C0C;--bg2:#161616;--bg3:#1E1E1E;
+  --b:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.15);
+  --t:#F0EDE8;--t2:#8A8682;--t3:#4A4845;
+  --acc:#F59E0B;--acc-d:rgba(245,158,11,0.12);
+  --ok:#22C55E;--ok-d:rgba(34,197,94,0.10);
+  --err:#EF4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;user-select:none}
+
+.hdr{display:flex;justify-content:space-between;align-items:center;
+  padding:13px 20px;border-bottom:1px solid var(--b);background:var(--bg2);flex-shrink:0}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.bar-badge{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;
+  letter-spacing:.1em;padding:4px 10px;background:var(--acc-d);color:var(--acc);
+  border:1px solid rgba(245,158,11,.22);border-radius:4px}
+.user{font-size:14px;color:var(--t2)}
+.hdr-r{display:flex;align-items:center;gap:14px}
+.clk{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;letter-spacing:.04em}
+.logout-btn{font-size:12px;color:var(--t3);background:none;border:none;cursor:pointer;
+  padding:4px 8px;border-radius:4px;transition:color .15s}
+.logout-btn:hover{color:var(--t2)}
+
+.main{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;
+  max-width:480px;margin:0 auto;width:100%}
+
+/* STOCK */
+.stock-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sc{background:var(--bg2);border:1px solid var(--b);border-radius:8px;
+  padding:10px 12px;text-align:center;transition:border-color .2s,background .2s}
+.sc.low{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.06)}
+.sc.warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06)}
+.sn{font-family:'DM Mono',monospace;font-size:18px;font-weight:500}
+.sn.low{color:var(--err)}.sn.warn{color:var(--acc)}.sn.pend{color:var(--t3)}
+.sl{font-size:10px;color:var(--t2);margin-top:3px;letter-spacing:.04em}
+
+/* PRODUCTS — renderizados por bar.js */
+.prods{display:flex;flex-direction:column;gap:6px}
+.pb{display:flex;align-items:center;gap:14px;padding:13px 16px;background:var(--bg2);
+  border:1px solid var(--b);border-radius:10px;cursor:pointer;
+  transition:border-color .15s,background .15s;text-align:left;width:100%}
+.pb:hover{border-color:var(--b2);background:var(--bg3)}
+.pb.active{border-color:var(--acc);background:var(--acc-d)}
+.pb.disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
+.pk{width:28px;height:28px;border-radius:6px;background:var(--bg3);
+  border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--t2);
+  flex-shrink:0;transition:all .15s}
+.pb.active .pk{background:var(--acc);border-color:var(--acc);color:#000}
+.pi{flex:1}
+.pname{font-size:14px;font-weight:500;color:var(--t)}
+.pdesc{font-size:11px;color:var(--t2);margin-top:2px}
+.ppr{font-family:'DM Mono',monospace;font-size:12px;color:var(--t3)}
+
+/* VENTA BOX */
+.vbox{background:var(--bg2);border:1px solid var(--b);border-radius:10px;
+  padding:14px;display:flex;flex-direction:column;gap:10px}
+.vrow{display:flex;align-items:center;gap:10px}
+.vlbl{font-size:12px;color:var(--t2);width:70px;flex-shrink:0;
+  display:flex;flex-direction:column;gap:3px}
+.opt{font-size:10px;color:var(--acc);background:var(--acc-d);
+  padding:1px 5px;border-radius:3px;width:fit-content}
+.divx{height:1px;background:var(--b)}
+
+.step{display:flex;align-items:center}
+.sb{width:36px;height:36px;background:var(--bg3);border:1px solid var(--b2);
+  color:var(--t);font-size:20px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:background .1s;font-family:'DM Mono',monospace}
+.sb:first-child{border-radius:6px 0 0 6px}
+.sb:last-child{border-radius:0 6px 6px 0}
+.sb:hover{background:#252525}.sb:active{background:#2E2E2E}
+.sv{width:50px;height:36px;background:var(--bg);border:1px solid var(--b2);
+  border-left:none;border-right:none;color:var(--t);font-family:'DM Mono',monospace;
+  font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:center}
+
+.pdisp{flex:1;font-family:'DM Mono',monospace;font-size:22px;font-weight:500;
+  color:var(--acc);display:flex;align-items:center;gap:8px}
+.cbadge{font-size:10px;color:var(--ok);background:var(--ok-d);
+  padding:2px 6px;border-radius:4px;font-family:'DM Sans',sans-serif;display:none}
+
+.minput{flex:1;background:var(--bg);border:1px solid var(--b2);border-radius:6px;
+  padding:8px 12px;color:var(--t);font-family:'DM Mono',monospace;font-size:16px;
+  outline:none;transition:border-color .15s;-moz-appearance:textfield;width:100%}
+.minput::-webkit-outer-spin-button,.minput::-webkit-inner-spin-button{-webkit-appearance:none}
+.minput:focus{border-color:var(--acc)}
+.minput::placeholder{color:var(--t3)}
+
+.vrow-vuelto{display:none}
+.vrow-vuelto.show{display:flex}
+.vuelto{font-family:'DM Mono',monospace;font-size:20px;font-weight:500}
+.vuelto.ok{color:var(--ok)}.vuelto.bad{color:var(--err)}
+
+.rbtn{padding:16px;background:var(--ok);color:#000;font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer;
+  width:100%;letter-spacing:.02em;transition:opacity .15s,transform .1s}
+.rbtn:hover{opacity:.9}.rbtn:active{transform:scale(.99)}
+.rbtn:disabled{background:var(--bg3);color:var(--t3);cursor:not-allowed;transform:none;opacity:1}
+
+.hints{display:flex;gap:16px;justify-content:center;padding:2px 0 6px;flex-wrap:wrap}
+.hint{font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.key{background:var(--bg3);border:1px solid var(--b2);border-radius:3px;
+  padding:1px 5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--t2)}
+
+.toast{position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(90px);padding:12px 20px;
+  border:1px solid var(--b2);border-radius:10px;font-size:14px;font-weight:500;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;
+  z-index:999;background:var(--bg3)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.1);color:var(--ok)}
+.toast.err{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.1);color:var(--err)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l">
+    <span class="bar-badge" id="bar-badge">BAR</span>
+    <span class="user" id="user-name">—</span>
+  </div>
+  <div class="hdr-r">
+    <div class="clk" id="clk">--:--</div>
+    <button class="logout-btn" onclick="window.doLogout()">salir</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Stock — IDs fijos porque los productos son fijos -->
+  <div class="stock-row">
+    <div class="sc" id="chip-arrecho">
+      <div class="sn" id="sn-arrecho">—</div>
+      <div class="sl">Arrecho</div>
+    </div>
+    <div class="sc" id="chip-russkaya">
+      <div class="sn pend" id="sn-russkaya">—</div>
+      <div class="sl">Russkaya</div>
+    </div>
+    <div class="sc" id="chip-corona">
+      <div class="sn" id="sn-corona">—</div>
+      <div class="sl">Corona</div>
+    </div>
+  </div>
+
+  <!-- Productos — renderizados dinámicamente por bar.js -->
+  <div class="prods" id="product-list"></div>
+
+  <!-- Venta -->
+  <div class="vbox">
+    <div class="vrow">
+      <span class="vlbl">Cantidad</span>
+      <div class="step">
+        <button class="sb" onclick="window.doChangeQty(-1)">−</button>
+        <div class="sv" id="qv">1</div>
+        <button class="sb" onclick="window.doChangeQty(1)">+</button>
+      </div>
+      <div class="pdisp">
+        <span id="pval">—</span>
+        <span class="cbadge" id="cb">combo</span>
+      </div>
+    </div>
+    <div class="divx"></div>
+    <div class="vrow">
+      <span class="vlbl">
+        Recibido
+        <span class="opt">opcional</span>
+      </span>
+      <input type="number" class="minput" id="rec" placeholder="$0.00"
+        step="0.25" min="0" oninput="window.doCalcVuelto()">
+    </div>
+    <div class="vrow vrow-vuelto" id="vr">
+      <span class="vlbl">Vuelto</span>
+      <span class="vuelto" id="vv">$0.00</span>
+    </div>
+  </div>
+
+  <button class="rbtn" id="rbtn" onclick="window.doRegister()" disabled>
+    Registrar venta
+  </button>
+
+  <div class="hints">
+    <div class="hint"><span class="key">1</span><span class="key">2</span><span class="key">3</span> producto</div>
+    <div class="hint"><span class="key">+</span><span class="key">−</span> cantidad</div>
+    <div class="hint"><span class="key">Enter</span> registrar</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initBar, selectProduct, changeQty, registerSale, calcVuelto, logout }
+  from './js/bar.js';
+
+// Exponer a los onclick del HTML
+window.doSelectProduct = selectProduct;
+window.doChangeQty     = changeQty;
+window.doRegister      = registerSale;
+window.doCalcVuelto    = calcVuelto;
+window.doLogout        = logout;
+
+initBar();
+</script>
+</body>
+</html>

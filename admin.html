@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Bar Evento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F2EE;--bg2:#FFFFFF;--bg3:#ECEAE5;
+  --b:rgba(0,0,0,0.07);--b2:rgba(0,0,0,0.13);
+  --t:#18171A;--t2:#6B6966;--t3:#AEACA7;
+  --grn:#16A34A;--grn-d:#DCFCE7;
+  --blu:#2563EB;--blu-d:#DBEAFE;
+  --amb:#D97706;--amb-d:#FEF3C7;
+  --red:#DC2626;--red-d:#FEE2E2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+/* HEADER */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--b);padding:13px 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:10}
+.htitle{font-size:15px;font-weight:600}
+.hsub{font-size:12px;color:var(--t2);margin-top:1px}
+.hdr-r{display:flex;align-items:center;gap:18px}
+.live{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--grn);font-weight:500}
+.live::before{content:'';width:7px;height:7px;background:var(--grn);border-radius:50%;
+  animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.clk{font-family:'DM Mono',monospace;font-size:18px;font-weight:500}
+.logout-btn{font-size:12px;color:var(--t3);background:none;border:none;cursor:pointer;
+  padding:4px 8px;border-radius:4px;transition:color .15s}
+.logout-btn:hover{color:var(--t2)}
+
+/* LAYOUT */
+.main{max-width:1000px;margin:0 auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px}
+
+/* ALERT */
+.alert{background:var(--red-d);border:1px solid rgba(220,38,38,.25);border-radius:8px;
+  padding:10px 14px;font-size:13px;color:var(--red);display:none;align-items:center;gap:8px}
+.alert.show{display:flex}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mcard{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:16px}
+.mlbl{font-size:11px;color:var(--t2);letter-spacing:.04em;margin-bottom:6px}
+.mval{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;line-height:1}
+.mval.green{color:var(--grn)}.mval.blue{color:var(--blu)}
+.msub{font-size:11px;color:var(--t3);margin-top:5px}
+
+/* POR BAR */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bcard{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:16px}
+.bchead{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--b)}
+.bctitle{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}
+.bbadge{font-size:10px;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.bbadge.b1{background:var(--blu-d);color:var(--blu)}
+.bbadge.b2{background:var(--grn-d);color:var(--grn)}
+.bctotal{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--grn)}
+.prow{margin-bottom:10px}
+.prhead{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.prname{color:var(--t2)}.prqty{font-family:'DM Mono',monospace;font-weight:500;color:var(--t)}
+.prbar{height:4px;background:var(--bg3);border-radius:2px}
+.prfill{height:4px;border-radius:2px;transition:width .5s ease}
+
+/* STOCK + BOTELLAS */
+.stock3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.scard{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:14px}
+.sname{font-size:11px;color:var(--t2);letter-spacing:.04em;margin-bottom:4px}
+.snum{font-family:'DM Mono',monospace;font-size:22px;font-weight:500}
+.sbot{font-size:11px;color:var(--t3);margin-top:3px;font-family:'DM Mono',monospace}
+.sbar{height:4px;background:var(--bg3);border-radius:2px;margin:9px 0 4px}
+.sfill{height:4px;border-radius:2px;transition:width .6s ease,background .6s}
+.spct{font-size:11px;color:var(--t3)}
+
+/* HISTORIAL */
+.hcard{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:16px}
+.hchead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hctitle{font-size:14px;font-weight:500}
+.hccount{font-size:12px;color:var(--t2)}
+.hlist{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
+.hlist::-webkit-scrollbar{width:4px}
+.hlist::-webkit-scrollbar-track{background:var(--bg3);border-radius:2px}
+.hlist::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.hrow{display:flex;align-items:center;gap:9px;padding:8px 10px;
+  background:var(--bg);border-radius:7px;font-size:13px;
+  animation:sin .2s ease}
+@keyframes sin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.htime{font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);width:38px;flex-shrink:0}
+.hbadge{font-size:10px;padding:2px 6px;border-radius:4px;letter-spacing:.04em;flex-shrink:0}
+.hbadge.b1{background:var(--blu-d);color:var(--blu)}
+.hbadge.b2{background:var(--grn-d);color:var(--grn)}
+.huser{color:var(--t3);font-size:12px;flex-shrink:0;min-width:52px}
+.hprod{flex:1;color:var(--t2)}
+.hqty{font-family:'DM Mono',monospace;font-size:12px;color:var(--t);flex-shrink:0}
+.htotal{font-family:'DM Mono',monospace;font-weight:500;color:var(--grn);
+  min-width:46px;text-align:right;flex-shrink:0}
+.empty{text-align:center;padding:24px;color:var(--t3);font-size:13px}
+
+.sec-lbl{font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.04em;margin-bottom:10px}
+
+@media(max-width:640px){
+  .hdr{padding:10px 14px;flex-wrap:wrap;gap:8px}
+  .hdr-r{gap:10px}
+  .clk{font-size:14px}
+  .main{padding:14px 12px;gap:12px}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .mval{font-size:18px}
+  .two{grid-template-columns:1fr}
+  .stock3{grid-template-columns:repeat(2,1fr)}
+  .hrow{flex-wrap:wrap;gap:5px}
+  .hprod{flex-basis:100%;order:1}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="htitle">Panel del contador</div>
+    <div class="hsub">Bar Evento · Sábado 24</div>
+  </div>
+  <div class="hdr-r">
+    <div class="live">En vivo</div>
+    <div class="clk" id="clk">--:--</div>
+    <button class="logout-btn" onclick="window.doLogout()">salir</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="alert" id="alert">⚠ Stock bajo — revisar reabastecimiento</div>
+
+  <!-- MÉTRICAS -->
+  <div class="metrics">
+    <div class="mcard">
+      <div class="mlbl">Total recaudado</div>
+      <div class="mval green" id="m-tot">$0</div>
+      <div class="msub">ambos bares</div>
+    </div>
+    <div class="mcard">
+      <div class="mlbl">Transacciones</div>
+      <div class="mval" id="m-sales">0</div>
+      <div class="msub">ventas registradas</div>
+    </div>
+    <div class="mcard">
+      <div class="mlbl">Unidades servidas</div>
+      <div class="mval blue" id="m-cups">0</div>
+      <div class="msub">vasos + cervezas</div>
+    </div>
+    <div class="mcard">
+      <div class="mlbl">Ticket promedio</div>
+      <div class="mval" id="m-avg">—</div>
+      <div class="msub">por transacción</div>
+    </div>
+  </div>
+
+  <!-- POR BAR -->
+  <div class="two">
+    <div class="bcard">
+      <div class="bchead">
+        <div class="bctitle">Bar 1 <span class="bbadge b1" id="b1-badge">—</span></div>
+        <span class="bctotal" id="b1-tot">$0</span>
+      </div>
+      <div class="prow">
+        <div class="prhead">
+          <span class="prname">Cóctel Arrecho</span>
+          <span class="prqty" id="b1-arrecho">0 vasos</span>
+        </div>
+        <div class="prbar"><div class="prfill" id="b1-arrechob" style="width:0%;background:var(--blu)"></div></div>
+      </div>
+      <div class="prow">
+        <div class="prhead">
+          <span class="prname">Cóctel Russkaya</span>
+          <span class="prqty" id="b1-russkaya">0 vasos</span>
+        </div>
+        <div class="prbar"><div class="prfill" id="b1-russkayab" style="width:0%;background:var(--blu)"></div></div>
+      </div>
+      <div class="prow" style="margin-bottom:0">
+        <div class="prhead">
+          <span class="prname">Corona 355ml</span>
+          <span class="prqty" id="b1-corona">0 unid.</span>
+        </div>
+        <div class="prbar"><div class="prfill" id="b1-coronab" style="width:0%;background:var(--amb)"></div></div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="bchead">
+        <div class="bctitle">Bar 2 <span class="bbadge b2" id="b2-badge">—</span></div>
+        <span class="bctotal" id="b2-tot">$0</span>
+      </div>
+      <div class="prow">
+        <div class="prhead">
+          <span class="prname">Cóctel Arrecho</span>
+          <span class="prqty" id="b2-arrecho">0 vasos</span>
+        </div>
+        <div class="prbar"><div class="prfill" id="b2-arrechob" style="width:0%;background:var(--grn)"></div></div>
+      </div>
+      <div class="prow">
+        <div class="prhead">
+          <span class="prname">Cóctel Russkaya</span>
+          <span class="prqty" id="b2-russkaya">0 vasos</span>
+        </div>
+        <div class="prbar"><div class="prfill" id="b2-russkayab" style="width:0%;background:var(--grn)"></div></div>
+      </div>
+      <div class="prow" style="margin-bottom:0">
+        <div class="prhead">
+          <span class="prname">Corona 355ml</span>
+          <span class="prqty" id="b2-corona">0 unid.</span>
+        </div>
+        <div class="prbar"><div class="prfill" id="b2-coronab" style="width:0%;background:var(--amb)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK RESTANTE + BOTELLAS -->
+  <div>
+    <div class="sec-lbl">Stock restante</div>
+    <div class="stock3">
+      <div class="scard">
+        <div class="sname">Arrecho</div>
+        <div class="snum" id="st-arrecho">—</div>
+        <div class="sbot" id="st-arrecho-bot">84 bot. restantes · 0 usadas</div>
+        <div class="sbar"><div class="sfill" id="st-arrecho-bar" style="width:100%;background:var(--grn)"></div></div>
+        <div class="spct" id="st-arrecho-pct">100% disponible</div>
+      </div>
+      <div class="scard">
+        <div class="sname">Russkaya</div>
+        <div class="snum" style="color:var(--t3)">—</div>
+        <div class="sbot" style="color:var(--t3)">pendiente confirmación</div>
+        <div class="sbar"><div class="sfill" style="width:0%;background:var(--t3)"></div></div>
+        <div class="spct">—</div>
+      </div>
+      <div class="scard">
+        <div class="sname">Corona 355ml</div>
+        <div class="snum" id="st-corona">—</div>
+        <div class="sbot" id="st-corona-bot"></div>
+        <div class="sbar"><div class="sfill" id="st-corona-bar" style="width:100%;background:var(--grn)"></div></div>
+        <div class="spct" id="st-corona-pct">100% disponible</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="hcard">
+    <div class="hchead">
+      <span class="hctitle">Historial de ventas</span>
+      <span class="hccount" id="hcount">0 registros</span>
+    </div>
+    <div class="hlist" id="hlist">
+      <div class="empty">Esperando primeras ventas...</div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initAdmin, logout } from './js/admin.js';
+
+window.doLogout = logout;
+
+initAdmin();
+</script>
+</body>
+</html>

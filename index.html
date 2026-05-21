@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bar Evento — Acceso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C0C0C;--bg2:#161616;--bg3:#1E1E1E;
+  --b:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.15);
+  --t:#F0EDE8;--t2:#8A8682;--t3:#4A4845;
+  --acc:#F59E0B;--acc-d:rgba(245,158,11,0.12);
+  --ok:#22C55E;--ok-d:rgba(34,197,94,0.10);
+  --err:#EF4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+
+.card{width:100%;max-width:380px;background:var(--bg2);border:1px solid var(--b);
+  border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:24px}
+
+.logo{text-align:center}
+.logo-title{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.logo-sub{font-size:13px;color:var(--t2);margin-top:4px}
+.logo-badge{display:inline-block;margin-top:8px;font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:.12em;padding:3px 10px;background:var(--acc-d);
+  color:var(--acc);border:1px solid rgba(245,158,11,.22);border-radius:4px}
+
+.fields{display:flex;flex-direction:column;gap:10px}
+
+.field-wrap{display:flex;flex-direction:column;gap:5px}
+.field-lbl{font-size:12px;color:var(--t2)}
+.field-input{background:var(--bg);border:1px solid var(--b2);border-radius:8px;
+  padding:11px 14px;color:var(--t);font-family:'DM Sans',sans-serif;font-size:14px;
+  outline:none;transition:border-color .15s;width:100%}
+.field-input:focus{border-color:var(--acc)}
+.field-input::placeholder{color:var(--t3)}
+
+.btn{padding:14px;background:var(--ok);color:#000;font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer;
+  width:100%;transition:opacity .15s,transform .1s;letter-spacing:.01em}
+.btn:hover{opacity:.9}
+.btn:active{transform:scale(.99)}
+.btn:disabled{background:var(--bg3);color:var(--t3);cursor:not-allowed;transform:none;opacity:1}
+.btn.loading::after{content:' ...'}
+
+.err-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
+  border-radius:8px;padding:10px 14px;font-size:13px;color:var(--err);display:none}
+.err-msg.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-title">Bar Evento</div>
+    <div class="logo-sub">Sistema de contabilidad</div>
+    <div class="logo-badge">SÁBADO 24</div>
+  </div>
+
+  <div class="fields">
+    <div class="field-wrap">
+      <label class="field-lbl" for="email">Correo electrónico</label>
+      <input class="field-input" id="email" type="email" placeholder="carlos@bar.com" autocomplete="email">
+    </div>
+    <div class="field-wrap">
+      <label class="field-lbl" for="pass">Contraseña</label>
+      <input class="field-input" id="pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+  </div>
+
+  <div class="err-msg" id="err"></div>
+
+  <button class="btn" id="btn" onclick="doLogin()">Ingresar</button>
+</div>
+
+<script type="module">
+import { login } from './js/auth.js';
+
+window.doLogin = async function() {
+  const email = document.getElementById('email').value.trim();
+  const pass  = document.getElementById('pass').value;
+  const btn   = document.getElementById('btn');
+  const err   = document.getElementById('err');
+
+  if (!email || !pass) {
+    showErr('Completa todos los campos.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = 'Ingresando';
+  err.classList.remove('show');
+
+  try {
+    await login(email, pass);
+    // login() redirige automáticamente según rol
+  } catch (e) {
+    const msgs = {
+      'auth/user-not-found':    'Usuario no encontrado.',
+      'auth/wrong-password':    'Contraseña incorrecta.',
+      'auth/invalid-email':     'Correo inválido.',
+      'auth/too-many-requests': 'Demasiados intentos. Espera un momento.',
+    };
+    showErr(msgs[e.code] || e.message || 'Error al ingresar.');
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'Ingresar';
+  }
+};
+
+function showErr(msg) {
+  const el = document.getElementById('err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// Enter para submit
+document.getElementById('pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') window.doLogin();
+});
+</script>
+</body>
+</html>
