@@ -7,12 +7,6 @@ import { getAuth }                               from 'https://www.gstatic.com/f
 import { getFirestore, enableIndexedDbPersistence }
                                                  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCB82WoPFE8pCeNLhRyqD8AOwFHiIvsJFY",
   authDomain: "bar-evento.firebaseapp.com",
@@ -21,9 +15,6 @@ const firebaseConfig = {
   messagingSenderId: "183212658361",
   appId: "1:183212658361:web:5ea74371a58f382c435568"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 
 const app = initializeApp(firebaseConfig);
 
