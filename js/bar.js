@@ -237,6 +237,8 @@ export async function registerSale() {
 
 function resetVenta() {
   QTY = 1;
+  SIDX = -1;
+  document.querySelectorAll('.pb').forEach(b => b.classList.remove('active'));
   const recEl = document.getElementById('rec');
   if (recEl) recEl.value = '';
   const vrEl = document.getElementById('vr');
@@ -251,7 +253,7 @@ function showToast(msg, type) {
   t.textContent = msg;
   t.className = 'toast show ' + type;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3800);
 }
 
 function startClock() {
